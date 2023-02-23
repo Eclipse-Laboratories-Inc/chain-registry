@@ -1,0 +1,2 @@
+[default.databases.chain_registry]
+url = "postgres://postgres:postgres@localhost:5432/chain_registry"

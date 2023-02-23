@@ -1,0 +1,37 @@
+[package]
+name = "eclipse-chain-registry"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[workspace]
+members = [".", "entity", "migration"]
+
+[dependencies]
+entity = { path = "entity" }
+migration = { path = "migration" }
+async-trait = { version = "0.1" }
+rust-argon2 = "1.0"
+anyhow = "1.0"
+
+[dependencies.rocket]
+version = "0.5.0-rc.2"
+features = ["json", "secrets"]
+
+[dependencies.rocket_dyn_templates]
+version = "0.1.0-rc.1"
+features = ["tera"]
+
+[dependencies.sea-orm-rocket]
+git = "https://github.com/SeaQL/sea-orm"
+
+[dependencies.sea-orm]
+version = "^0.8.0"
+features = [
+  "runtime-tokio-native-tls",
+  "sqlx-postgres",
+  "macros"
+]
+[default.databases.chain_registry]
+url = "postgres://postgres:password@localhost:5432/chain_registry"

@@ -31,6 +31,7 @@ impl MigrationTrait for Migration {
                         ColumnDef::new(EvmChain::ChainId)
                             .string()
                             .not_null()
+                            .unique_key()
                     )
                     .col(ColumnDef::new(EvmChain::RpcUrls).array(ColumnType::String(Some(255))).not_null())
                     .col(ColumnDef::new(EvmChain::BlockExplorerUrls).array(ColumnType::String(Some(255))).not_null())

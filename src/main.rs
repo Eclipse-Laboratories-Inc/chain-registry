@@ -52,7 +52,7 @@ async fn evm_chains(conn: Connection<'_, Db>) -> Result<Json<Vec<EvmChain>>, Sta
     Ok(Json(chains))
 }
 
-#[post("/add_evm_chain", data = "<evm_chain>")]
+#[post("/evm_chains", data = "<evm_chain>")]
 async fn add_evm_chain(conn: Connection<'_, Db>, evm_chain: Json<EvmChain>, _key: ApiKey) -> Status {
 
 

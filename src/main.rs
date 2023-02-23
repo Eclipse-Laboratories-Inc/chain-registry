@@ -4,6 +4,7 @@ extern crate rocket;
 use std::env;
 use eclipse_chain_registry::entity::evm_chain::Model as EvmChain;
 use eclipse_chain_registry::entity::evm_chain;
+use evm_chain::Entity as EvmChainEntity;
 use eclipse_chain_registry::pool::Db;
 use rocket::request::Outcome;
 use rocket::serde::json::Json;
@@ -11,6 +12,7 @@ use sea_orm::ActiveModelTrait;
 use sea_orm_rocket::Connection;
 use sea_orm_rocket::Database;
 use sea_orm::Set;
+use sea_orm::EntityTrait;
 use rocket::http::Status;
 use rocket::request::{self, Request, FromRequest};
 
@@ -43,6 +45,12 @@ impl<'r> FromRequest<'r> for ApiKey {
     }
 }
 
+#[get("/evm_chains")]
+async fn evm_chains(conn: Connection<'_, Db>) -> Result<Json<Vec<EvmChain>>, Status> {
+    let db = conn.into_inner();
+    let chains = EvmChainEntity::find().all(db).await.expect("couldnt load evm chains");
+    Ok(Json(chains))
+}
 
 #[post("/add_evm_chain", data = "<evm_chain>")]
 async fn add_evm_chain(conn: Connection<'_, Db>, evm_chain: Json<EvmChain>, _key: ApiKey) -> Status {
@@ -73,5 +81,5 @@ async fn add_evm_chain(conn: Connection<'_, Db>, evm_chain: Json<EvmChain>, _key
 fn rocket() -> _ {
     rocket::build()
         .attach(Db::init())
-        .mount("/", routes![add_evm_chain])
+        .mount("/", routes![add_evm_chain, evm_chains])
 }

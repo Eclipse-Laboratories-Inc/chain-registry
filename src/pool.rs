@@ -19,8 +19,17 @@ impl sea_orm_rocket::Pool for SeaOrmPool {
 
     type Connection = sea_orm::DatabaseConnection;
 
-    async fn init(figment: &Figment) -> Result<Self, Self::Error> {
-        let config = figment.extract::<Config>().unwrap();
+    async fn init(_figment: &Figment) -> Result<Self, Self::Error> {
+        let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL NOT SET");
+        let config: Config = sea_orm_rocket::Config {
+                url: db_url,
+                min_connections: None,
+                max_connections: 1024,
+                connect_timeout: 3,
+                idle_timeout: None,
+                sqlx_logging: true,
+            };
+
         let mut options: ConnectOptions = config.url.into();
         options
             .max_connections(config.max_connections as u32)

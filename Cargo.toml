@@ -16,7 +16,7 @@ anyhow = "1.0"
 
 [dependencies.rocket]
 version = "0.5.0-rc.2"
-features = ["json", "secrets"]
+features = ["json"]
 
 
 [dependencies.sea-orm-rocket]
@@ -29,5 +29,3 @@ features = [
   "macros",
   "postgres-array"
 ]
-[default.databases.chain_registry]
-url = "postgres://postgres:password@localhost:5432/chain_registry"

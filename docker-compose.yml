@@ -1,13 +1,26 @@
-version: '3.1'
-services:
 
-  postgres:
-    container_name: postgres
-    image: postgres
-    restart: always
+version: '3.8'
+
+services:
+  db:
     environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "postgres"
-      POSTGRES_DB: "chain_registry"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_DB: "${POSTGRES_DB}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    image: postgres:15.2-alpine
     ports:
-    - "5432:5432"
+      - "5432:5432"
+  server:
+    links:
+      - db
+    restart: always
+    depends_on:
+      - db
+    build: .
+    environment:
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
+      ROCKET_LOG_LEVEL: debug
+    ports:
+      - "8000:8000"
+
+      # postgres://postgres:postgres@0.0.0.0:5432/chain_registry

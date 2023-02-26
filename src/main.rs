@@ -6,6 +6,12 @@ use eclipse_chain_registry::entity::evm_chain::Model as EvmChain;
 use eclipse_chain_registry::entity::evm_chain;
 use evm_chain::Entity as EvmChainEntity;
 use eclipse_chain_registry::pool::Db;
+use migration::Migrator;
+use migration::MigratorTrait;
+use rocket::Build;
+use rocket::Rocket;
+use rocket::fairing;
+use rocket::fairing::AdHoc;
 use rocket::request::Outcome;
 use rocket::serde::json::Json;
 use sea_orm::ActiveModelTrait;
@@ -77,9 +83,19 @@ async fn add_evm_chain(conn: Connection<'_, Db>, evm_chain: Json<EvmChain>, _key
 
 }
 
+async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
+    let conn = &Db::fetch(&rocket).unwrap().conn;
+    let _ = migration::Migrator::up(conn, None).await;
+    Ok(rocket)
+}
+
+
 #[launch]
 fn rocket() -> _ {
+
+
     rocket::build()
         .attach(Db::init())
+        .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
         .mount("/", routes![add_evm_chain, evm_chains])
 }

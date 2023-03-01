@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use sea_orm::ConnectOptions;
 use sea_orm_rocket::{rocket::figment::Figment, Config, Database};
+use std::env;
 use std::time::Duration;
 
 #[derive(Database, Debug)]
@@ -12,6 +13,14 @@ pub struct SeaOrmPool {
     pub conn: sea_orm::DatabaseConnection,
 }
 
+fn postgres_url() -> String {
+    let user = env::var("POSTGRES_USER").expect("POSTGRES_USER not set");
+    let password = env::var("POSTGRES_PASSWORD").expect("POSTGRES_PASSWORD not set");
+    let host = env::var("POSTGRES_HOST").expect("POSTGRES_HOST not set");
+    let db_name = env::var("POSTGRES_DB").expect("POSTGRES_DB not set");
+    format!("postgresql://{user}:{password}@{host}/{db_name}")
+}
+
 #[async_trait]
 impl sea_orm_rocket::Pool for SeaOrmPool {
     type Error = sea_orm::DbErr;
@@ -19,9 +28,8 @@ impl sea_orm_rocket::Pool for SeaOrmPool {
     type Connection = sea_orm::DatabaseConnection;
 
     async fn init(_figment: &Figment) -> Result<Self, Self::Error> {
-        let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL NOT SET");
         let config: Config = sea_orm_rocket::Config {
-            url: db_url,
+            url: postgres_url(),
             min_connections: None,
             max_connections: 1024,
             connect_timeout: 3,

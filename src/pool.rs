@@ -18,7 +18,12 @@ fn postgres_url() -> String {
     let password = env::var("POSTGRES_PASSWORD").expect("POSTGRES_PASSWORD not set");
     let host = env::var("POSTGRES_HOST").expect("POSTGRES_HOST not set");
     let db_name = env::var("POSTGRES_DB").expect("POSTGRES_DB not set");
-    format!("postgresql://{user}:{password}@{host}/{db_name}")
+
+    if host.starts_with("/cloudsql") {
+        format!("postgresql://{user}:{password}@/{db_name}?unix_sock={host}/.s.PGSQL.5432")
+    } else {
+        format!("postgresql://{user}:{password}@{host}/{db_name}")
+    }
 }
 
 #[async_trait]

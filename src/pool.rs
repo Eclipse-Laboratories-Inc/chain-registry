@@ -1,4 +1,3 @@
-
 use async_trait::async_trait;
 use sea_orm::ConnectOptions;
 use sea_orm_rocket::{rocket::figment::Figment, Config, Database};
@@ -22,13 +21,13 @@ impl sea_orm_rocket::Pool for SeaOrmPool {
     async fn init(_figment: &Figment) -> Result<Self, Self::Error> {
         let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL NOT SET");
         let config: Config = sea_orm_rocket::Config {
-                url: db_url,
-                min_connections: None,
-                max_connections: 1024,
-                connect_timeout: 3,
-                idle_timeout: None,
-                sqlx_logging: true,
-            };
+            url: db_url,
+            min_connections: None,
+            max_connections: 1024,
+            connect_timeout: 3,
+            idle_timeout: None,
+            sqlx_logging: true,
+        };
 
         let mut options: ConnectOptions = config.url.into();
         options

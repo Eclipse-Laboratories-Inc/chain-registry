@@ -1,2 +1,2 @@
-pub mod pool;
 pub mod entity;
+pub mod pool;

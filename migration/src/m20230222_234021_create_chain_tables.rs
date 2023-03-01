@@ -15,13 +15,12 @@ enum EvmChain {
     NativeCurrencySymbol,
     BlockExplorerUrls,
     IconUrls,
-    DataAvailability
+    DataAvailability,
 }
 
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-
         manager
             .create_table(
                 Table::create()
@@ -31,16 +30,44 @@ impl MigrationTrait for Migration {
                         ColumnDef::new(EvmChain::ChainId)
                             .string()
                             .not_null()
-                            .unique_key()
+                            .unique_key(),
                     )
-                    .col(ColumnDef::new(EvmChain::RpcUrls).array(ColumnType::String(Some(255))).not_null())
-                    .col(ColumnDef::new(EvmChain::BlockExplorerUrls).array(ColumnType::String(Some(255))).not_null())
-                    .col(ColumnDef::new(EvmChain::IconUrls).array(ColumnType::String(Some(255))).not_null())
+                    .col(
+                        ColumnDef::new(EvmChain::RpcUrls)
+                            .array(ColumnType::String(Some(255)))
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EvmChain::BlockExplorerUrls)
+                            .array(ColumnType::String(Some(255)))
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EvmChain::IconUrls)
+                            .array(ColumnType::String(Some(255)))
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(EvmChain::ChainName).string().not_null())
-                    .col(ColumnDef::new(EvmChain::NativeCurrencyName).string().not_null())
-                    .col(ColumnDef::new(EvmChain::NativeCurrencyDecimals).integer().not_null())
-                    .col(ColumnDef::new(EvmChain::NativeCurrencySymbol).string().not_null())
-                    .col(ColumnDef::new(EvmChain::DataAvailability).string().not_null())
+                    .col(
+                        ColumnDef::new(EvmChain::NativeCurrencyName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EvmChain::NativeCurrencyDecimals)
+                            .integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EvmChain::NativeCurrencySymbol)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EvmChain::DataAvailability)
+                            .string()
+                            .not_null(),
+                    )
                     .to_owned(),
             )
             .await
@@ -52,4 +79,3 @@ impl MigrationTrait for Migration {
             .await
     }
 }
-

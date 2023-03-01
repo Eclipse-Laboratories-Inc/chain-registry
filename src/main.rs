@@ -1,26 +1,25 @@
 #[macro_use]
 extern crate rocket;
 
-use std::env;
-use eclipse_chain_registry::entity::evm_chain::Model as EvmChain;
 use eclipse_chain_registry::entity::evm_chain;
-use evm_chain::Entity as EvmChainEntity;
+use eclipse_chain_registry::entity::evm_chain::Model as EvmChain;
 use eclipse_chain_registry::pool::Db;
-use migration::Migrator;
+use evm_chain::Entity as EvmChainEntity;
 use migration::MigratorTrait;
-use rocket::Build;
-use rocket::Rocket;
 use rocket::fairing;
 use rocket::fairing::AdHoc;
+use rocket::http::Status;
 use rocket::request::Outcome;
+use rocket::request::{self, FromRequest, Request};
 use rocket::serde::json::Json;
+use rocket::Build;
+use rocket::Rocket;
 use sea_orm::ActiveModelTrait;
+use sea_orm::EntityTrait;
+use sea_orm::Set;
 use sea_orm_rocket::Connection;
 use sea_orm_rocket::Database;
-use sea_orm::Set;
-use sea_orm::EntityTrait;
-use rocket::http::Status;
-use rocket::request::{self, Request, FromRequest};
+use std::env;
 
 struct ApiKey(String);
 
@@ -54,14 +53,19 @@ impl<'r> FromRequest<'r> for ApiKey {
 #[get("/evm_chains")]
 async fn evm_chains(conn: Connection<'_, Db>) -> Result<Json<Vec<EvmChain>>, Status> {
     let db = conn.into_inner();
-    let chains = EvmChainEntity::find().all(db).await.expect("couldnt load evm chains");
+    let chains = EvmChainEntity::find()
+        .all(db)
+        .await
+        .expect("couldnt load evm chains");
     Ok(Json(chains))
 }
 
 #[post("/evm_chains", data = "<evm_chain>")]
-async fn add_evm_chain(conn: Connection<'_, Db>, evm_chain: Json<EvmChain>, _key: ApiKey) -> Status {
-
-
+async fn add_evm_chain(
+    conn: Connection<'_, Db>,
+    evm_chain: Json<EvmChain>,
+    _key: ApiKey,
+) -> Status {
     let db = conn.into_inner();
     let chain = evm_chain.into_inner();
 
@@ -80,7 +84,6 @@ async fn add_evm_chain(conn: Connection<'_, Db>, evm_chain: Json<EvmChain>, _key
         Ok(_) => Status::Created,
         Err(_) => Status::UnprocessableEntity,
     }
-
 }
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
@@ -89,11 +92,8 @@ async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
     Ok(rocket)
 }
 
-
 #[launch]
 fn rocket() -> _ {
-
-
     rocket::build()
         .attach(Db::init())
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))

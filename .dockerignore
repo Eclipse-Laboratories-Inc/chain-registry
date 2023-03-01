@@ -1,0 +1,8 @@
+.dockerignore
+.gcloudignore
+.git
+**/.gitignore
+LICENSE
+/target
+**/*.md
+**/Dockerfile

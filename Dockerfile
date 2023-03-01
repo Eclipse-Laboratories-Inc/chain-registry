@@ -5,7 +5,7 @@ COPY . .
 
 RUN cargo build --release --bin eclipse-chain-registry
 
-FROM gcr.io/distroless/base-debian11
+FROM gcr.io/distroless/cc-debian11
 COPY --from=build /app/target/release/eclipse-chain-registry .
 EXPOSE 8000
 

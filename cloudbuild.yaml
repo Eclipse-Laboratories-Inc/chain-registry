@@ -18,11 +18,23 @@ steps:
   - 'Dockerfile'
   - '.'
   timeout: 3600s
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', '${_IMAGE_NAME}']
+- name: 'gcr.io/cloud-builders/gcloud'
+  args:
+  - 'run'
+  - 'deploy'
+  - '${_NAME}'
+  - '--image'
+  - '${_IMAGE_NAME}'
+  - '--region'
+  - '${_LOCATION}'
 images:
 - '${_IMAGE_NAME}'
 substitutions:
-  _IMAGE_NAME: '${_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/chain-registry:latest'
+  _IMAGE_NAME: '${_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_NAME}:latest'
   _LOCATION: us-central1
+  _NAME: chain-registry
   _REPOSITORY: eclipse-docker-apps
 options:
   dynamic_substitutions: true

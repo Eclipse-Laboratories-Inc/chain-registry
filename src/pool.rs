@@ -33,19 +33,27 @@ const USERINFO: &AsciiSet = &PATH
     .add(b'^')
     .add(b'|');
 
-fn postgres_url() -> String {
+/// Add `/` and `:` to support Unix socket hosts in Cloud SQL:
+/// <https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING>
+const HOST: &AsciiSet = &CONTROLS.add(b'/').add(b':');
+
+fn postgres_url(user: &str, password: &str, host: &str, db_name: &str) -> String {
+    format!(
+        "postgresql://{user}:{password}@{host}/{db_name}",
+        user = utf8_percent_encode(user, USERINFO),
+        password = utf8_percent_encode(password, USERINFO),
+        host = utf8_percent_encode(host, HOST),
+        db_name = utf8_percent_encode(db_name, PATH),
+    )
+}
+
+fn postgres_url_from_env() -> String {
     let user = env::var("POSTGRES_USER").expect("POSTGRES_USER not set");
     let password = env::var("POSTGRES_PASSWORD").expect("POSTGRES_PASSWORD not set");
     let host = env::var("POSTGRES_HOST").expect("POSTGRES_HOST not set");
     let db_name = env::var("POSTGRES_DB").expect("POSTGRES_DB not set");
 
-    format!(
-        "postgresql://{user}:{password}@{host}/{db_name}",
-        user = utf8_percent_encode(&user, USERINFO),
-        password = utf8_percent_encode(&password, USERINFO),
-        host = utf8_percent_encode(&host, CONTROLS),
-        db_name = utf8_percent_encode(&db_name, PATH),
-    )
+    postgres_url(&user, &password, &host, &db_name)
 }
 
 #[async_trait]
@@ -56,7 +64,7 @@ impl sea_orm_rocket::Pool for SeaOrmPool {
 
     async fn init(_figment: &Figment) -> Result<Self, Self::Error> {
         let config: Config = sea_orm_rocket::Config {
-            url: postgres_url(),
+            url: postgres_url_from_env(),
             min_connections: None,
             max_connections: 1024,
             connect_timeout: 3,
@@ -79,5 +87,27 @@ impl sea_orm_rocket::Pool for SeaOrmPool {
 
     fn borrow(&self) -> &Self::Connection {
         &self.conn
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn postgres_url_to_string() {
+        assert_eq!(
+            postgres_url("user", "p@ssw0rd!", "127.0.0.1", "db"),
+            "postgresql://user:p%40ssw0rd!@127.0.0.1/db",
+        );
+        assert_eq!(
+            postgres_url(
+                "user",
+                "p@ssw0rd!",
+                "/cloudsql/eclipse-123456:us-central1:eclipse",
+                "db",
+            ),
+            "postgresql://user:p%40ssw0rd!@%2Fcloudsql%2Feclipse-123456%3Aus-central1%3Aeclipse/db",
+        );
     }
 }

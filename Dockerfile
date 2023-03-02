@@ -1,12 +1,12 @@
-FROM rust:1.65.0
+FROM rust:1.67.1 AS build
 
-# Copy local code to the container image.
-WORKDIR /usr/src/app
+WORKDIR /app
 COPY . .
 
-# Install production dependencies and build a release artifact.
-RUN cargo install --path .
+RUN cargo build --release --bin eclipse-chain-registry
+
+FROM gcr.io/distroless/cc-debian11
+COPY --from=build /app/target/release/eclipse-chain-registry .
 EXPOSE 8000
 
-# Run the web service on container startup.
-CMD ["eclipse-chain-registry"]
+ENTRYPOINT ["./eclipse-chain-registry"]

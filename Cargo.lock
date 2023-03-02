@@ -752,6 +752,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "migration",
+ "percent-encoding",
  "rocket",
  "rust-argon2",
  "sea-orm",

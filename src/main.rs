@@ -69,7 +69,6 @@ async fn remove_evm_chain(conn: Connection<'_, Db>, chain_id: String, _key: ApiK
         Ok(_) => Status::Ok,
         Err(_) => Status::InternalServerError,
     }
-
 }
 
 #[post("/evm_chains", data = "<evm_chain>")]
@@ -98,6 +97,11 @@ async fn add_evm_chain(
     }
 }
 
+#[get("/health")]
+async fn health_check() -> Status {
+    Status::Ok
+}
+
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
     let conn = &Db::fetch(&rocket).unwrap().conn;
     let _ = migration::Migrator::up(conn, None).await;
@@ -109,9 +113,8 @@ fn rocket() -> _ {
     rocket::build()
         .attach(Db::init())
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
-        .mount("/", routes![
-            add_evm_chain,
-            evm_chains,
-            remove_evm_chain,
-        ])
+        .mount(
+            "/",
+            routes![add_evm_chain, evm_chains, remove_evm_chain, health_check],
+        )
 }

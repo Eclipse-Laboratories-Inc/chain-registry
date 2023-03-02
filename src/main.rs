@@ -60,6 +60,18 @@ async fn evm_chains(conn: Connection<'_, Db>) -> Result<Json<Vec<EvmChain>>, Sta
     Ok(Json(chains))
 }
 
+#[delete("/evm_chains/<chain_id>")]
+async fn remove_evm_chain(conn: Connection<'_, Db>, chain_id: String, _key: ApiKey) -> Status {
+    let db = conn.into_inner();
+    let res = EvmChainEntity::delete_by_id(chain_id).exec(db).await;
+
+    match res {
+        Ok(_) => Status::Ok,
+        Err(_) => Status::InternalServerError,
+    }
+
+}
+
 #[post("/evm_chains", data = "<evm_chain>")]
 async fn add_evm_chain(
     conn: Connection<'_, Db>,
@@ -97,5 +109,9 @@ fn rocket() -> _ {
     rocket::build()
         .attach(Db::init())
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
-        .mount("/", routes![add_evm_chain, evm_chains])
+        .mount("/", routes![
+            add_evm_chain,
+            evm_chains,
+            remove_evm_chain,
+        ])
 }

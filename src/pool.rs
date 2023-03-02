@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
 use sea_orm::ConnectOptions;
 use sea_orm_rocket::{rocket::figment::Figment, Config, Database};
 use std::env;
@@ -13,17 +14,38 @@ pub struct SeaOrmPool {
     pub conn: sea_orm::DatabaseConnection,
 }
 
+/// <https://url.spec.whatwg.org/#query-percent-encode-set>
+const QUERY: &AsciiSet = &CONTROLS.add(b' ').add(b'"').add(b'#').add(b'<').add(b'>');
+
+/// <https://url.spec.whatwg.org/#path-percent-encode-set>
+const PATH: &AsciiSet = &QUERY.add(b'?').add(b'`').add(b'{').add(b'}');
+
+/// <https://url.spec.whatwg.org/#userinfo-percent-encode-set>
+const USERINFO: &AsciiSet = &PATH
+    .add(b'/')
+    .add(b':')
+    .add(b';')
+    .add(b'=')
+    .add(b'@')
+    .add(b'[')
+    .add(b'\\')
+    .add(b']')
+    .add(b'^')
+    .add(b'|');
+
 fn postgres_url() -> String {
     let user = env::var("POSTGRES_USER").expect("POSTGRES_USER not set");
     let password = env::var("POSTGRES_PASSWORD").expect("POSTGRES_PASSWORD not set");
     let host = env::var("POSTGRES_HOST").expect("POSTGRES_HOST not set");
     let db_name = env::var("POSTGRES_DB").expect("POSTGRES_DB not set");
 
-    if host.starts_with("/cloudsql") {
-        format!("postgresql://{user}:{password}@/{db_name}?unix_sock={host}/.s.PGSQL.5432")
-    } else {
-        format!("postgresql://{user}:{password}@{host}/{db_name}")
-    }
+    format!(
+        "postgresql://{user}:{password}@{host}/{db_name}",
+        user = utf8_percent_encode(&user, USERINFO),
+        password = utf8_percent_encode(&password, USERINFO),
+        host = utf8_percent_encode(&host, CONTROLS),
+        db_name = utf8_percent_encode(&db_name, PATH),
+    )
 }
 
 #[async_trait]

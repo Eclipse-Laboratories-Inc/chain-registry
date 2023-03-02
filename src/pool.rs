@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
 use sea_orm::ConnectOptions;
-use sea_orm_rocket::{rocket::figment::Figment, Config, Database};
+use sea_orm_rocket::{rocket::figment::Figment, Database};
 use std::env;
 use std::time::Duration;
 
@@ -63,23 +63,10 @@ impl sea_orm_rocket::Pool for SeaOrmPool {
     type Connection = sea_orm::DatabaseConnection;
 
     async fn init(_figment: &Figment) -> Result<Self, Self::Error> {
-        let config: Config = sea_orm_rocket::Config {
-            url: postgres_url_from_env(),
-            min_connections: None,
-            max_connections: 1024,
-            connect_timeout: 3,
-            idle_timeout: None,
-            sqlx_logging: true,
-        };
-
-        let mut options: ConnectOptions = config.url.into();
+        let mut options = ConnectOptions::new(postgres_url_from_env());
         options
-            .max_connections(config.max_connections as u32)
-            .min_connections(config.min_connections.unwrap_or_default())
-            .connect_timeout(Duration::from_secs(config.connect_timeout));
-        if let Some(idle_timeout) = config.idle_timeout {
-            options.idle_timeout(Duration::from_secs(idle_timeout));
-        }
+            .max_connections(1024)
+            .connect_timeout(Duration::from_secs(3));
         let conn = sea_orm::Database::connect(options).await?;
 
         Ok(SeaOrmPool { conn })

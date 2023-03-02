@@ -98,7 +98,7 @@ async fn add_evm_chain(
 }
 
 #[get("/health")]
-async fn health_check() -> Status {
+fn health_check() -> Status {
     Status::Ok
 }
 

@@ -21,61 +21,58 @@ enum EvmChain {
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        manager
-            .create_table(
-                Table::create()
-                    .table(EvmChain::Table)
-                    .if_not_exists()
-                    .col(
-                        ColumnDef::new(EvmChain::ChainId)
-                            .string()
-                            .not_null()
-                            .unique_key(),
-                    )
-                    .col(
-                        ColumnDef::new(EvmChain::RpcUrls)
-                            .array(ColumnType::String(Some(255)))
-                            .not_null(),
-                    )
-                    .col(
-                        ColumnDef::new(EvmChain::BlockExplorerUrls)
-                            .array(ColumnType::String(Some(255)))
-                            .not_null(),
-                    )
-                    .col(
-                        ColumnDef::new(EvmChain::IconUrls)
-                            .array(ColumnType::String(Some(255)))
-                            .not_null(),
-                    )
-                    .col(ColumnDef::new(EvmChain::ChainName).string().not_null())
-                    .col(
-                        ColumnDef::new(EvmChain::NativeCurrencyName)
-                            .string()
-                            .not_null(),
-                    )
-                    .col(
-                        ColumnDef::new(EvmChain::NativeCurrencyDecimals)
-                            .integer()
-                            .not_null(),
-                    )
-                    .col(
-                        ColumnDef::new(EvmChain::NativeCurrencySymbol)
-                            .string()
-                            .not_null(),
-                    )
-                    .col(
-                        ColumnDef::new(EvmChain::DataAvailability)
-                            .string()
-                            .not_null(),
-                    )
-                    .to_owned(),
+        let mut table = Table::create();
+        table
+            .table(EvmChain::Table)
+            .if_not_exists()
+            .col(
+                ColumnDef::new(EvmChain::ChainId)
+                    .string()
+                    .not_null()
+                    .unique_key(),
             )
-            .await
+            .col(
+                ColumnDef::new(EvmChain::RpcUrls)
+                    .array(ColumnType::String(Some(255)))
+                    .not_null(),
+            )
+            .col(
+                ColumnDef::new(EvmChain::BlockExplorerUrls)
+                    .array(ColumnType::String(Some(255)))
+                    .not_null(),
+            )
+            .col(
+                ColumnDef::new(EvmChain::IconUrls)
+                    .array(ColumnType::String(Some(255)))
+                    .not_null(),
+            )
+            .col(ColumnDef::new(EvmChain::ChainName).string().not_null())
+            .col(
+                ColumnDef::new(EvmChain::NativeCurrencyName)
+                    .string()
+                    .not_null(),
+            )
+            .col(
+                ColumnDef::new(EvmChain::NativeCurrencyDecimals)
+                    .integer()
+                    .not_null(),
+            )
+            .col(
+                ColumnDef::new(EvmChain::NativeCurrencySymbol)
+                    .string()
+                    .not_null(),
+            )
+            .col(
+                ColumnDef::new(EvmChain::DataAvailability)
+                    .string()
+                    .not_null(),
+            );
+        manager.create_table(table).await
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        manager
-            .drop_table(Table::drop().table(EvmChain::Table).to_owned())
-            .await
+        let mut table = Table::drop();
+        table.table(EvmChain::Table);
+        manager.drop_table(table).await
     }
 }

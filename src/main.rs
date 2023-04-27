@@ -110,9 +110,12 @@ async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
 
 #[launch]
 fn rocket() -> _ {
+    let cors = rocket_cors::CorsOptions::default().to_cors().unwrap();
+
     rocket::build()
         .attach(Db::init())
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
+        .attach(cors)
         .mount(
             "/",
             routes![add_evm_chain, evm_chains, remove_evm_chain, health_check],

@@ -21,7 +21,6 @@ use sea_orm_rocket::Connection;
 use sea_orm_rocket::Database;
 use std::env;
 
-
 struct ApiKey(String);
 
 /// Returns true if `key` is a valid API key string.
@@ -50,7 +49,6 @@ impl<'r> FromRequest<'r> for ApiKey {
         }
     }
 }
-
 
 #[get("/evm_chains")]
 async fn evm_chains(conn: Connection<'_, Db>) -> Result<Json<Vec<EvmChain>>, Status> {
@@ -112,9 +110,7 @@ async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
 
 #[launch]
 fn rocket() -> _ {
-
-    let cors = rocket_cors::CorsOptions::default()
-    .to_cors().unwrap();
+    let cors = rocket_cors::CorsOptions::default().to_cors().unwrap();
 
     rocket::build()
         .attach(Db::init())

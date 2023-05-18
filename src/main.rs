@@ -3,8 +3,11 @@ extern crate rocket;
 
 use eclipse_chain_registry::entity::evm_chain;
 use eclipse_chain_registry::entity::evm_chain::Model as EvmChain;
+use eclipse_chain_registry::entity::svm_chain;
+use eclipse_chain_registry::entity::svm_chain::Model as SvmChain;
 use eclipse_chain_registry::pool::Db;
 use evm_chain::Entity as EvmChainEntity;
+use svm_chain::Entity as SvmChainEntity;
 use migration::MigratorTrait;
 use rocket::fairing;
 use rocket::fairing::AdHoc;
@@ -60,6 +63,26 @@ async fn evm_chains(conn: Connection<'_, Db>) -> Result<Json<Vec<EvmChain>>, Sta
     Ok(Json(chains))
 }
 
+#[get("/svm_chains")]
+async fn svm_chains(conn: Connection<'_, Db>) -> Result<Json<Vec<SvmChain>>, Status> {
+    let db = conn.into_inner();
+    let chains = SvmChainEntity::find()
+        .all(db)
+        .await
+        .expect("couldnt load svm chains");
+    Ok(Json(chains))
+}
+#[delete("/svm_chains/<chain_name>")]
+async fn remove_svm_chain(conn: Connection<'_, Db>, chain_name: String, _key: ApiKey) -> Status {
+    let db = conn.into_inner();
+    let res = SvmChainEntity::delete_by_id(chain_name).exec(db).await;
+
+    match res {
+        Ok(_) => Status::Ok,
+        Err(_) => Status::InternalServerError,
+    }
+}
+
 #[delete("/evm_chains/<chain_id>")]
 async fn remove_evm_chain(conn: Connection<'_, Db>, chain_id: String, _key: ApiKey) -> Status {
     let db = conn.into_inner();
@@ -68,6 +91,27 @@ async fn remove_evm_chain(conn: Connection<'_, Db>, chain_id: String, _key: ApiK
     match res {
         Ok(_) => Status::Ok,
         Err(_) => Status::InternalServerError,
+    }
+}
+
+#[post("/svm_chains", data = "<svm_chain>")]
+async fn add_svm_chain(
+    conn: Connection<'_, Db>,
+    svm_chain: Json<SvmChain>,
+    _key: ApiKey,
+) -> Status {
+    let db = conn.into_inner();
+    let chain = svm_chain.into_inner();
+
+    let new_chain: svm_chain::ActiveModel = svm_chain::ActiveModel {
+        chain_name: Set(chain.chain_name),
+        rpc_urls: Set(chain.rpc_urls),
+        block_explorer_urls: Set(chain.block_explorer_urls),
+        data_availability: Set(chain.data_availability),
+    };
+    match new_chain.insert(db).await {
+        Ok(_) => Status::Created,
+        Err(_) => Status::UnprocessableEntity,
     }
 }
 
@@ -118,6 +162,14 @@ fn rocket() -> _ {
         .attach(cors)
         .mount(
             "/",
-            routes![add_evm_chain, evm_chains, remove_evm_chain, health_check],
+            routes![
+                add_evm_chain,
+                evm_chains,
+                remove_evm_chain,
+                add_svm_chain,
+                svm_chains,
+                remove_svm_chain,
+                health_check
+                ],
         )
 }

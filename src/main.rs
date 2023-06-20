@@ -24,6 +24,8 @@ use sea_orm_rocket::Connection;
 use sea_orm_rocket::Database;
 use std::env;
 use rocket::serde::{Deserialize};
+use sea_orm::ColumnTrait;
+use sea_orm::QueryFilter;
 
 struct ApiKey(String);
 
@@ -78,6 +80,16 @@ async fn evm_chains(conn: Connection<'_, Db>) -> Result<Json<Vec<EvmChain>>, Sta
     Ok(Json(chains))
 }
 
+#[get("/evm_chains/<slug>")]
+async fn get_evm_chain_by_slug(conn: Connection<'_, Db>, slug: String) -> Result<Json<Vec<EvmChain>>, Status> {
+    let db = conn.into_inner();
+    let chains = EvmChainEntity::find()
+        .filter(evm_chain::Column::Slug.contains(&slug))
+        .all(db)
+        .await
+        .expect("couldnt load evm chains");
+    Ok(Json(chains))
+}
 
 #[get("/svm_chains")]
 async fn svm_chains(conn: Connection<'_, Db>) -> Result<Json<Vec<SvmChain>>, Status> {
@@ -232,6 +244,7 @@ fn rocket() -> _ {
                 svm_chains,
                 remove_svm_chain,
                 update_evm_chain,
+                get_evm_chain_by_slug,
                 health_check
                 ],
         )

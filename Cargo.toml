@@ -12,6 +12,9 @@ async-trait = { version = "0.1" }
 migration = { path = "migration" }
 percent-encoding = "2.2.0"
 rust-argon2 = "1.0"
+rocket_cors = { git = "https://github.com/lawliet89/rocket_cors", branch = "master" }
+dotenv = "0.15.0"
+serde = "1.0.164"
 
 [dependencies.rocket]
 version = "0.5.0-rc.2"

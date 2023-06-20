@@ -4,7 +4,7 @@ use sea_orm_migration::prelude::*;
 pub struct Migration;
 
 #[derive(Iden)]
-enum EvmChain {
+pub enum EvmChain {
     Table,
     RpcUrls,
     #[iden = "chainId"] // Renaming the identifier

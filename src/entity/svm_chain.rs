@@ -5,21 +5,14 @@ use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Deserialize, Serialize)]
 #[serde(crate = "rocket::serde")]
-#[sea_orm(table_name = "evm_chain")]
+#[sea_orm(table_name = "svm_chain")]
 pub struct Model {
-    #[sea_orm(column_name = "chainId")]
+    #[sea_orm(column_name = "chainName")]
     #[sea_orm(primary_key)]
-    pub chain_id: String,
+    pub chain_name: String,
     pub rpc_urls: Vec<String>,
     pub block_explorer_urls: Vec<String>,
-    pub icon_urls: Vec<String>,
-    pub chain_name: String,
-    pub native_currency_name: String,
-    pub native_currency_decimals: i32,
-    pub native_currency_symbol: String,
     pub data_availability: String,
-    // this column was added later but should not be optional
-    // clean up after adding slugs to all existing chains.
     pub slug: Option<String>,
 }
 

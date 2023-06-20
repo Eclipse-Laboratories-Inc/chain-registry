@@ -4,6 +4,7 @@ use sea_orm::ConnectOptions;
 use sea_orm_rocket::{rocket::figment::Figment, Database};
 use std::env;
 use std::time::Duration;
+use dotenv::dotenv;
 
 #[derive(Database, Debug)]
 #[database("chain_registry")]
@@ -63,6 +64,7 @@ impl sea_orm_rocket::Pool for SeaOrmPool {
     type Connection = sea_orm::DatabaseConnection;
 
     async fn init(_figment: &Figment) -> Result<Self, Self::Error> {
+        dotenv().ok();
         let mut options = ConnectOptions::new(postgres_url_from_env());
         options
             .max_connections(1024)

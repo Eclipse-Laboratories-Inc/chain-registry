@@ -3,3 +3,4 @@
 pub mod prelude;
 
 pub mod evm_chain;
+pub mod svm_chain;

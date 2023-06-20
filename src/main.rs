@@ -3,8 +3,11 @@ extern crate rocket;
 
 use eclipse_chain_registry::entity::evm_chain;
 use eclipse_chain_registry::entity::evm_chain::Model as EvmChain;
+use eclipse_chain_registry::entity::svm_chain;
+use eclipse_chain_registry::entity::svm_chain::Model as SvmChain;
 use eclipse_chain_registry::pool::Db;
 use evm_chain::Entity as EvmChainEntity;
+use svm_chain::Entity as SvmChainEntity;
 use migration::MigratorTrait;
 use rocket::fairing;
 use rocket::fairing::AdHoc;
@@ -213,9 +216,12 @@ async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
 
 #[launch]
 fn rocket() -> _ {
+    let cors = rocket_cors::CorsOptions::default().to_cors().unwrap();
+
     rocket::build()
         .attach(Db::init())
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
+        .attach(cors)
         .mount(
             "/",
             routes![

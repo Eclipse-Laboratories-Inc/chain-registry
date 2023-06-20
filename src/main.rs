@@ -81,14 +81,14 @@ async fn evm_chains(conn: Connection<'_, Db>) -> Result<Json<Vec<EvmChain>>, Sta
 }
 
 #[get("/evm_chains/<slug>")]
-async fn get_evm_chain_by_slug(conn: Connection<'_, Db>, slug: String) -> Result<Json<Vec<EvmChain>>, Status> {
+async fn get_evm_chain_by_slug(conn: Connection<'_, Db>, slug: String) -> Result<Json<EvmChain>, Status> {
     let db = conn.into_inner();
-    let chains = EvmChainEntity::find()
+    let chain = EvmChainEntity::find()
         .filter(evm_chain::Column::Slug.contains(&slug))
-        .all(db)
+        .one(db)
         .await
         .expect("couldnt load evm chains");
-    Ok(Json(chains))
+    Ok(Json(chain.unwrap()))
 }
 
 #[get("/svm_chains")]

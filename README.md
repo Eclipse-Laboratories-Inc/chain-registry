@@ -33,25 +33,25 @@ Curlie is a powerful command-line HTTP client. It is a hybrid of cURL and HTTPie
 For instance, to fetch all EVM chains, you could use the following command:
 
 ```bash
-curlie GET https://your-api-url/evm_chains
+curlie GET https://api.chains.eclipse.builders/evm_chains
 ```
 
 To fetch a specific EVM chain by its slug:
 
 ```bash
-curlie GET https://your-api-url/evm_chains/<slug>
+curlie GET https://api.chains.eclipse.builders/evm_chains/<slug>
 ```
 
 To delete a specific SVM chain (note that this operation requires the `x-api-key` header for authentication):
 
 ```bash
-curlie DELETE https://your-api-url/svm_chains/<chain_name> x-api-key:<Your-API-Key>
+curlie DELETE https://api.chains.eclipse.builders/svm_chains/<chain_name> x-api-key:<Your-API-Key>
 ```
 
 To create a new EVM chain:
 
 ```bash
-curlie POST https://your-api-url/evm_chains x-api-key:<Your-API-Key> Content-Type:application/json < JSON-data
+curlie POST https://api.chains.eclipse.builders/evm_chains x-api-key:<Your-API-Key> Content-Type:application/json < JSON-data
 ```
 
 In the above command, `JSON-data` should contain the necessary data for the new chain, such as the `chain_id`, `rpc_urls`, `block_explorer_urls`, etc.
@@ -82,7 +82,7 @@ The PATCH request will apply the provided updates to the specified chain, and it
 Here's how you might use the `curlie` command-line tool to send a PATCH request:
 
 ```bash
-curlie PATCH https://your-api-url/evm_chains/<chain_id> x-api-key:<Your-API-Key> Content-Type:application/json '{"native_currency_name": "New Currency Name", "native_currency_symbol": "NCS"}'
+curlie PATCH https://api.chains.eclipse.builders/evm_chains/<chain_id> x-api-key:<Your-API-Key> Content-Type:application/json '{"native_currency_name": "New Currency Name", "native_currency_symbol": "NCS"}'
 ```
 
 In this example, we're updating the `native_currency_name` and `native_currency_symbol` fields of the EVM chain with a specified `chain_id`. Replace `<chain_id>` with the actual ID of the chain you want to update, and `<Your-API-Key>` with your actual API key.

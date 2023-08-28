@@ -54,9 +54,19 @@ To create a new EVM chain:
 curlie POST https://api.chains.eclipse.builders/evm_chains x-api-key:<Your-API-Key> Content-Type:application/json < JSON-data
 ```
 
-In the above command, `JSON-data` should contain the necessary data for the new chain, such as the `chain_id`, `rpc_urls`, `block_explorer_urls`, etc.
+In the above command, `JSON-data` should contain the necessary data for the new chain, here is the complete list of fields:
 
-Note: Replace `https://your-api-url` with your actual API URL.
+
+- `chain_id`: A string representing the unique chain ID.
+- `rpc_urls`: An array of strings containing RPC URLs for the chain.
+- `block_explorer_urls`: An array of strings containing block explorer URLs for the chain.
+- `icon_urls`: An array of strings containing URLs of icons representing the chain.
+- `chain_name`: A string representing the chain name.
+- `native_currency_name`: A string representing the native currency's name.
+- `native_currency_decimals`: An integer representing the number of decimal places in the native currency.
+- `native_currency_symbol`: A string representing the native currency's symbol.
+- `data_availability`: A string indicating the data availability status.
+- `slug`: A string representing a URL-friendly version of the chain name.
 
 ## Updating an EVM Chain (PATCH Request)
 
